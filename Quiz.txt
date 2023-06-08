@@ -1,0 +1,11 @@
+1. Unit Testing: It's like checking if each piece of code does what it's supposed to do when you test it separately, making sure it gives the right results for different inputs.
+2. Integration Testing: Making sure that when you aggregate pieces of code together, they work well together without any errors or loopholes.
+3. System Testing: Testing the whole software system to see if everything works properly as a team, making sure all the parts fit together nicely and meet the requirements.
+4. Acceptance Testing: Checking if the software meets the needs of the business and makes the clients or users happy with what they expected.
+
+5. False
+6. Jupiter
+7. assertEquals: comparing two things to see if they're the same, and if they're not, it tells you something went wrong
+8. assertNull: Checks if a value is null and raises an error if it is not
+9. assertTrue: Checks if something you expect to be true is actually true, and if it's not, raises a flag
+10. assertFalse: Checks if something you expect to be false is really false, and if it's not, raises a flag
