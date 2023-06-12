@@ -1,83 +1,109 @@
 package com.gcash;
 
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.util.UUID;
+
+import static org.junit.jupiter.api.Assertions.*;
+
 public class AccountRepositoryTest {
+    private AccountRepository accountRepository;
 
-    @Test
-    void successfulAccountCreation() {
-        AccountRepository repository = new AccountRepository();
-
-        // Create an account with name "Mai" and initial balance of 89.9
-        String accountId = repository.createAccount("Mai", 89.9);
-
-        // Verify that the account was created successfully
-        Assertions.assertEquals(1, repository.getNumberOfAccounts());
-        Assertions.assertEquals("Mai", repository.getAccount(accountId).getName());
-        Assertions.assertNotNull(accountId);
+    @BeforeEach
+    public void setUp() {
+        accountRepository = new AccountRepository();
     }
 
     @Test
-    void successfulGetAccount() {
-        AccountRepository repository = new AccountRepository();
-
-        // Create an account with name "Mai" and initial balance of 89.9
-        String accountId = repository.createAccount("Mai", 89.9);
-
-        // Verify that the account can be retrieved successfully
-        Assertions.assertEquals("Mai", repository.getAccount(accountId).getName());
-        Assertions.assertEquals(89.9, repository.getAccount(accountId).getBalance());
-
-        // Verify that a non-existent account returns null
-        Assertions.assertNull(repository.getAccount("randomid"));
+    public void testAccountConstructor_InvalidInitialBalance() {
+        // Try to create an account with negative initial balance, it should throw an exception
+        assertThrows(IllegalArgumentException.class,
+                () -> new Account("1", "Mai", -100.0));
     }
 
     @Test
-    void successfulDeleteAccount() {
-        AccountRepository repository = new AccountRepository();
+    public void testSetBalance_InvalidNewBalance() {
+        Account account = new Account("1", "Mai", 100.0);
 
-        // Create an account with name "Mai" and initial balance of 89.9
-        String accountId = repository.createAccount("Mai", 89.9);
-
-        // Delete the account
-        repository.deleteAccount(accountId);
-
-        // Verify that the account was deleted successfully
-        Assertions.assertEquals(0, repository.getNumberOfAccounts());
-        Assertions.assertNull(repository.getAccount(accountId));
+        // Try to set a negative balance, it should throw an exception
+        assertThrows(IllegalArgumentException.class,
+                () -> account.setBalance(-50.0));
     }
 
     @Test
-    void successfulGetNumberOfAccounts() {
-        AccountRepository repository = new AccountRepository();
-
-        // Create three accounts with different names and balances
-        String id0 = repository.createAccount("Mai", 89.9);
-        String id1 = repository.createAccount("John", 50.0);
-        String id2 = repository.createAccount("Jane", 100.0);
-
-        // Verify that the number of accounts is correct
-        Assertions.assertEquals(3, repository.getNumberOfAccounts());
-
-        // Delete one of the accounts
-        repository.deleteAccount(id1);
-
-        // Verify that the number of accounts is updated after deletion
-        Assertions.assertEquals(2, repository.getNumberOfAccounts());
+    public void testCreateAccount() {
+        // Test creating an account with valid initial balance
+        String accountId = accountRepository.createAccount("Mai", 100.0);
+        assertNotNull(accountId);
+        assertTrue(accountId.length() > 0);
+        assertEquals(1, accountRepository.getNumberOfAccounts());
     }
 
     @Test
-    void successfulNoRegisteredAccount() {
-        AccountRepository repository = new AccountRepository();
+    public void testGetAccount_existingAccount() {
+        // Create an account and test retrieving it
+        String accountId = accountRepository.createAccount("Mai", 100.0);
+        Account account = accountRepository.getAccount(accountId);
+        assertNotNull(account);
+        assertEquals(accountId, account.getId());
+        assertEquals("Mai", account.getName());
+        assertEquals(100.0, account.getBalance());
+    }
 
-        // Verify that there are no registered accounts initially
-        Assertions.assertTrue(repository.noRegisteredAccount());
+    @Test
+    public void testGetAccount_nonExistingAccount() {
+        // Test retrieving a non-existing account, it should return null
+        Account account = accountRepository.getAccount("non_existing_id");
+        assertNull(account);
+    }
 
-        // Create an account
-        repository.createAccount("Mai", 89.9);
+    @Test
+    public void testDeleteAccount_existingAccount() {
+        // Create an account and delete it, then verify the account is removed from the repository
+        String accountId = accountRepository.createAccount("Mai", 100.0);
+        accountRepository.deleteAccount(accountId);
+        assertEquals(0, accountRepository.getNumberOfAccounts());
+        assertNull(accountRepository.getAccount(accountId));
+    }
 
-        // Verify that there is at least one registered account
-        Assertions.assertFalse(repository.noRegisteredAccount());
+    @Test
+    public void testDeleteAccount_nonExistingAccount() {
+        // Try to delete a non-existing account, it should not throw an exception
+        assertDoesNotThrow(() -> accountRepository.deleteAccount("non_existing_id"));
+    }
+
+    @Test
+    public void testGetNumberOfAccounts_emptyRepository() {
+        // Test the number of accounts in an empty repository
+        assertEquals(0, accountRepository.getNumberOfAccounts());
+        assertTrue(accountRepository.noRegisteredAccount());
+    }
+
+    @Test
+    public void testGetNumberOfAccounts_nonEmptyRepository() {
+        // Create multiple accounts and test the number of accounts and the repository not being empty
+        accountRepository.createAccount("Mai", 100.0);
+        accountRepository.createAccount("Dizon", 200.0);
+        assertEquals(2, accountRepository.getNumberOfAccounts());
+        assertFalse(accountRepository.noRegisteredAccount());
+    }
+
+    @Test
+    public void testGetNumberOfAccounts_afterAccountDeletion() {
+        // Create an account, delete it, and then test the number of accounts in the repository
+        String accountId = accountRepository.createAccount("Mai", 100.0);
+        accountRepository.deleteAccount(accountId);
+        assertEquals(0, accountRepository.getNumberOfAccounts());
+    }
+
+    @Test
+    public void testGetAccount_afterAccountDeletion() {
+        // Create an account, delete it, and then try to retrieve the deleted account, it should return null
+        String accountId = accountRepository.createAccount("Mai", 100.0);
+        accountRepository.deleteAccount(accountId);
+        Account account = accountRepository.getAccount(accountId);
+        assertNull(account);
     }
 }

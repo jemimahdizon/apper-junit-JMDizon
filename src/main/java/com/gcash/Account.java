@@ -1,7 +1,7 @@
 package com.gcash;
 
 public class Account {
-    // The original record implementation creates an immutable class,
+    // The original record implementation creates an immutable class as record,
     // For the purposes of this activity, I changed it to private fields and explicit getters and setters that allows for mutability.
     private String id;
     private String name;
